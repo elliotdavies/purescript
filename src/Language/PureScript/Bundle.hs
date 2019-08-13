@@ -737,11 +737,23 @@ codeGen optionsMainModule optionsNamespace ms outFileOpt = (fmap sourceMapping o
   emptyObj :: JSAnnot -> JSExpression
   emptyObj a = JSObjectLiteral a (JSCTLNone JSLNil) JSNoAnnot
 
+  promiseResolve :: JSAnnot -> JSExpression
+  promiseResolve a
+    = JSMemberExpression
+        (JSMemberDot
+          (JSIdentifier a "Promise")
+          JSNoAnnot
+          (JSIdentifier JSNoAnnot "resolve"))
+        JSNoAnnot
+        (JSLOne (emptyObj JSNoAnnot))
+        JSNoAnnot
+
   initializeObject :: JSAnnot -> (JSAnnot -> String -> JSExpression) -> String -> JSExpression
   initializeObject a makeReference mn =
     JSAssignExpression (makeReference a mn) (JSAssign sp)
     $ JSExpressionBinary (makeReference sp mn) (JSBinOpOr sp)
-    $ emptyObj sp
+    $ promiseResolve sp
+    -- $ emptyObj sp
 
   -- Like `somewhere`, but stops after the first successful transformation
   firstwhere :: MonadPlus m => GenericM m -> GenericM m
